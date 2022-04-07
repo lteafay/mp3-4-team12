@@ -1,0 +1,195 @@
+---
+title: "SDS 192 Mini-Projects 3 and 4"
+subtitle: "SDS 192"
+author: 
+- name: Author One
+  affiliation: Smith College
+- name: Author Two
+  affiliation: Smith College
+- name: Author Three
+  affiliation: Smith College
+date: "`r format(Sys.Date(), '%B %e, %Y')`"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    fig_width: 7
+    fig_height: 6
+    fig_caption: true
+    theme: lumen
+    df_print: paged
+    code_folding: show
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  message = FALSE,
+  echo = TRUE
+)
+library(tidyverse)
+library(leaflet)
+library(tidycensus)
+library(viridis)
+library(sf)
+```
+
+# Acquire TRI Data
+
+Uncomment the lines below, and replace FILL_FILE_NAME with the name of your TRI file.
+
+```{r tri-import, include=FALSE}
+# tri_2020 <- read_csv("datasets/FILL_FILE_NAME.csv", 
+#                      name_repair = make.names) %>%
+#   st_as_sf(coords = c("X13..LONGITUDE", "X12..LATITUDE"), 
+#            crs = 4269)
+```
+
+# Wrangle TRI Data
+
+Keep in mind that TRI reports emissions per facility per chemical. Create a new data frame below that filters to the emissions reported in Pounds at facilities in your county and then aggregates the data to calculate the total on-site emissions per facility. In other words, each row should be a unique facility, with columns for the TRI ID, the facility name, and the total on-site emissions. This is what you will eventually use to map the data.
+
+```{r tri-summary-table, include=FALSE}
+# tri_facility_on_site_totals_county <- 
+
+```
+
+Create a table reporting the top ten on-site polluters in your county, along with their on-site releases.
+
+```{r tri-analysis1, echo=FALSE}
+
+
+```
+
+Of emissions reported in pounds in your county, plot total on-site releases by medium (Air, Water, or Land) and by whether the released chemical was a carcinogen. Note that Air includes fugitive air releases and stack air releases, and Land includes underground, landfill, land treatment, surface impoundment, and other disposal releases. Be sure to add descriptive labels to your plot. 
+
+> This is a challenging step! Take this one step at a time. I recommend subsetting to the relevant rows first, and then create new columns for Air, Water, and Land. From here you will need to pivot and aggregate the data to calculate totals per medium and carcinogen status before plotting. 
+
+```{r tri-analysis2, echo=FALSE}
+
+
+```
+
+Create a table reporting the top ten chemicals emitted on-site in your county, along with their on-site releases into the air, on-site releases into the water, and on-site releases into the land. You may wish to borrow code from the previous step to streamline this step.
+
+```{r tri-analysis3, echo=FALSE}
+
+
+```
+
+# Acquire race and ethnicity data from the 2020 US Census
+
+The EPA's EJScreen visualizes environmental health risk factors alongside a number of demographic indicators. One indicator is the percentage of the population that identifies as a person of color, which they define as: 
+ 
+> The percent of individuals in a block group who list their racial status as a race other than white alone and/or list their ethnicity as Hispanic or Latino. That is, all people other than non-Hispanic white-alone individuals. The word "alone" in this case indicates that the person is of a single race, not multiracial.
+
+We will remember at this point that all categorizations both produce and delimit insight (and if you want to think more about this, I encourage you to take *Data Ethnography* with me next Spring!). This is a very imperfect way to capture environmental health disparities across sub-populations as it lumps together and aggregates data across many different forms of diversity in communities. However, in the case of EJScreen - which looks at national scale environmental justice concerns - this level of aggregation provides just enough insight to enable us to discern which communities we should investigate further for environmental injustices. When analyzing data at more local scales (such as a county), it may make more sense to focus in on disparities faced by a more specific social group in that county. 
+
+The instructions I list below adopt the EJScreen approach and prompt you to identify the percentage of the population in each block group and census tract in your county that identify as a person of color on the US census. You may choose to stick with this racial/ethnic aggregation. However, if, based on your online research about your county, you discover that a certain demographic group may be experiencing specific disparate impacts, reach out to me on Slack, and I'll be happy to help you find the census table for a more specific subgroup. If you do, please be ready to justify via your research why you intend to look at that particular sub-group. 
+
+Start this section by looking up the state and FIPS codes for your county here: https://www.nrcs.usda.gov/wps/portal/nrcs/detail/national/home/?cid=nrcs143_013697. The state code will be the first two numbers and the county code will be the second three numbers.
+
+After reading up on the function `get_decennial()` via the help pages, load census data at the block group level for variable 'P2_005N' (Total Population: Not Hispanic or Latino and White alone). You should set the state to the FIPS code for your state, the county to the FIPS code for your county, the year to 2020, geometry to TRUE, and the summary variable to 'P1_001N' (Total Population). We will eventually use these two tables to calculate the percentage of the population that identifies as a person of color on the census. 
+
+Repeat and edit the code to get the same data at the tract level.
+
+```{r census-import, include=FALSE}
+#census_block_groups <-
+
+#census_tracts <-
+
+```
+
+# Wrangle Census and Plot Data
+
+Add a column to both census data frames that calculates the percentage of the population in each census tract/block group that identified according to the demographic you selected for analysis (i.e. percent person of color, unless you coordinated a different census table with me). 
+
+> As a reminder, (assuming you haven't reached out to me to coordinate access to a different table) in your census data frames you have variables for 'P2_005N' (Total Population: Not Hispanic or Latino and White alone) and the summary_var 'P1_001N' (Total Population)
+
+```{r census-wrangle, include=FALSE}
+#census_block_groups <-
+
+#census_tracts <-
+
+```
+
+For whichever demographic variable you've settled on, plot the distribution of the percentages of individuals that identify with that demographic across block groups in your county. Be sure to add descriptive labels to your plot. 
+
+```{r census-distribution, echo=FALSE}
+
+
+```
+
+# Acquire Health Data and Join to Census Tracts
+
+Using the Socrata API, develop a query URL to import data from https://chronicdata.cdc.gov/resource/cwsq-ngmh as a CSV. You should import data for your state and county only, and limit the results to one health *outcome* indicator. I recommend using the short_question_text to identify that indicator in your URL. 
+
+After importing, join your census data (left) to your health data (right) and store the resulting data frame in `health_data_tracts_census`. Keep in mind that we should join like geographies. 
+
+```{r health-import include=FALSE}
+#health_data_tracts <- 
+
+#health_data_tracts_census <-
+
+```
+
+# Plot Health and Census Data
+
+Plot the value associated with your health indicator and the percentage of individuals that identify as the demographic you selected for your analysis in each census tract. 
+
+Note that a strong correlation here *does not* necessarily indicate a causal relationship between these variables. What variables beyond those represented on this plot might help to explain the degree of correlation?
+
+```{r health-demographic-plots, echo=FALSE}
+
+
+```
+
+
+# End PART ONE: Complete by April 15 =======================================
+
+# Part TWO: =======================================
+
+# Acquire Redlining Map Data
+
+Navigate to https://dsl.richmond.edu/panorama/redlining/#loc=5/39.1/-94.58&text=downloads, download the shapefile for your community, move it to your `datasets` folder, and then read it into `R`, using the `sf` package. Convert the CRS to NAD83 (4269).
+
+```{r redlining-import, include=FALSE}
+#redlining <- 
+
+```
+
+# Maps!
+
+Create a map of emissions per facility layered over census block groups. Color points by emissions, and color block groups by percentages of the population that identified according to the demographic you selected for your analysis.
+
+```{r census-map, echo=FALSE}
+#pal_tri <- 
+
+#pal_census <- 
+
+#Map here!
+
+```
+
+Create a map of emissions per facility layered over health data by census tracts. Color points by emissions, and color tracts by the health indicator's data value.
+
+```{r health-map, echo=FALSE}
+#pal_health <- 
+
+#Map here!
+```
+
+Create a map of emissions per facility layered over the redlining data. Color points by emissions, and color HOLCs by their grade.
+
+```{r redlining-map, echo=FALSE}
+#pal_redlining <- 
+
+#Map here!
+```
+
+# Report
+
+Compose your report here...
+
+
+
